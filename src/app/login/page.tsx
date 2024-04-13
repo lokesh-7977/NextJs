@@ -1,20 +1,35 @@
 "use client";
-import React, {useEffect , useState} from 'react';
-import Link from 'next/link'
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [user, setUser] = useState({ email: "", password: "" });
+  const [buttonDisabled, setButtonDisabled] = useState(false);
 
-  async function onLogin(e : any)  {
+  const router = useRouter();
+
+  async function onLogin(e: any) {
     e.preventDefault();
+
+    if (!user.email || !user.password) {
+      console.log('Please fill all fields');
+      return;
+    }
+
     try {
-      const response = await axios.post("/api/login", user);
+      const response : any = await axios.post("/api/users/login", user);
       console.log(response);
-    } catch (error) {
+      router.push("/profile");
+    } catch (error : any) {
       console.error(error);
     }
   }
+
+  useEffect(() => {
+    setButtonDisabled(!(user.email && user.password));
+  }, [user]);
 
   return (
     <div className="flex flex-col w-50% text-white bg-black text-center">
@@ -35,7 +50,8 @@ export default function LoginPage() {
 
       <label htmlFor="password">Password</label>
       <input
-        type="text"
+        className="text-black"
+        type="password"
         id="password"
         value={user.password}
         onChange={(e) =>
@@ -46,9 +62,8 @@ export default function LoginPage() {
         }
         placeholder="password"
       />
-      <button onClick={onLogin} >Login</button>
-      <Link href ='/signup'>Visit Signup </Link>
+      <button onClick={onLogin} disabled={buttonDisabled}>Login</button>
+      <Link href="/signup">Visit Signup </Link>
     </div>
-
   );
 }
